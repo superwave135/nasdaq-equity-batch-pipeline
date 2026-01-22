@@ -102,13 +102,13 @@ This project implements an **automated, scalable data pipeline** that extracts r
                         │
          ┌──────────────┼──────────────┐
          │              │              │
-    ┌────▼────┐   ┌─────▼──────┐  ┌───▼─────────┐
-    │dim_date │   │    FACT    │  │dim_exchange │
-    ├─────────┤   │stock_daily │  ├─────────────┤
-    │date_key │◄──┤   _price   │──►│exchange_key│
-    │calendar │   ├────────────┤  │exchange     │
-    │year/qtr │   │ 24 metrics │  │timezone     │
-    │month    │   │ • Prices   │  └─────────────┘
+    ┌────▼────┐   ┌─────▼──────┐   ┌───▼─────────┐
+    │dim_date │   │    FACT    │   │dim_exchange │
+    ├─────────┤   │stock_daily │   ├─────────────┤
+    │date_key │◄──┤   _price   │──►│exchange_key │
+    │calendar │   ├────────────┤   │exchange     │
+    │year/qtr │   │ 24 metrics │   │timezone     │
+    │month    │   │ • Prices   │   └─────────────┘
     │flags    │   │ • Volume   │
     └─────────┘   │ • Derived  │
                   └────────────┘
