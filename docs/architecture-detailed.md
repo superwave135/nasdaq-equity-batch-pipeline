@@ -29,12 +29,12 @@
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  📅 SCHEDULING LAYER                                                         │
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  Amazon EventBridge                                                │    │
-│  │  ├─ Schedule: Daily @ 10:30 AM SGT (02:30 UTC)                     │    │
-│  │  ├─ Expression: cron(30 2 * * ? *)                                 │    │
-│  │  └─ State: ENABLED                                                 │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  Amazon EventBridge                                                │      │
+│  │  ├─ Schedule: Daily @ 10:30 AM SGT (02:30 UTC)                     │      │
+│  │  ├─ Expression: cron(30 2 * * ? *)                                 │      │
+│  │  └─ State: ENABLED                                                 │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 │                              │                                               │
 │                              │ Triggers                                      │
 │                              ▼                                               │
@@ -43,56 +43,56 @@
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  🔄 ORCHESTRATION LAYER                                                      │
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  AWS Step Functions State Machine                                  │    │
-│  │  Name: nasdaq-stock-pipeline-dev                                   │    │
-│  │                                                                    │    │
-│  │  ┌──────────────────────────────────────────────────────────┐    │    │
-│  │  │  State 1: Extract Stock Data                             │    │    │
-│  │  │  ├─ Type: Lambda Invoke (Async)                          │    │    │
-│  │  │  ├─ Output: data_date (e.g., "2026-01-20")               │    │    │
-│  │  │  ├─ Retries: 2 attempts with exponential backoff         │    │    │
-│  │  │  └─ Timeout: 5 minutes                                   │    │    │
-│  │  └──────────────────────────────────────────────────────────┘    │    │
-│  │                           │                                       │    │
-│  │                           │ Wait 3s (S3 consistency)              │    │
-│  │                           ▼                                       │    │
-│  │  ┌──────────────────────────────────────────────────────────┐    │    │
-│  │  │  State 2: Process Dimensions                             │    │    │
-│  │  │  ├─ Type: Glue Job (Sync)                                │    │    │
-│  │  │  ├─ Job: build-stock-dimensions-dev                      │    │    │
-│  │  │  ├─ Parameters: --processing_date={data_date}            │    │    │
-│  │  │  ├─ Retries: 1 attempt                                   │    │    │
-│  │  │  └─ Timeout: 60 minutes                                  │    │    │
-│  │  └──────────────────────────────────────────────────────────┘    │    │
-│  │                           │                                       │    │
-│  │                           │ Wait 3s                               │    │
-│  │                           ▼                                       │    │
-│  │  ┌──────────────────────────────────────────────────────────┐    │    │
-│  │  │  State 3: Process Fact Table                             │    │    │
-│  │  │  ├─ Type: Glue Job (Sync)                                │    │    │
-│  │  │  ├─ Job: build-stock-fact-table-dev                      │    │    │
-│  │  │  ├─ Parameters: --processing_date={data_date}            │    │    │
-│  │  │  ├─ Retries: 1 attempt                                   │    │    │
-│  │  │  └─ Timeout: 60 minutes                                  │    │    │
-│  │  └──────────────────────────────────────────────────────────┘    │    │
-│  │                           │                                       │    │
-│  │                           │ Wait 3s                               │    │
-│  │                           ▼                                       │    │
-│  │  ┌──────────────────────────────────────────────────────────┐    │    │
-│  │  │  State 4: Process Aggregations                           │    │    │
-│  │  │  ├─ Type: Glue Job (Sync)                                │    │    │
-│  │  │  ├─ Job: build-stock-aggregations-dev                    │    │    │
-│  │  │  ├─ Parameters: --processing_date={data_date}            │    │    │
-│  │  │  ├─ Retries: 1 attempt                                   │    │    │
-│  │  │  └─ Timeout: 60 minutes                                  │    │    │
-│  │  └──────────────────────────────────────────────────────────┘    │    │
-│  │                           │                                       │    │
-│  │                           ▼                                       │    │
-│  │  ┌──────────────────────────────────────────────────────────┐    │    │
-│  │  │  Pipeline Succeeded ✅                                    │    │    │
-│  │  └──────────────────────────────────────────────────────────┘    │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  AWS Step Functions State Machine                                  │      │
+│  │  Name: nasdaq-equity-batch-pipeline-dev                            │      │
+│  │                                                                    │      │
+│  │  ┌──────────────────────────────────────────────────────────┐      │      │
+│  │  │  State 1: Extract Stock Data                             │      │      │
+│  │  │  ├─ Type: Lambda Invoke (Async)                          │      │      │
+│  │  │  ├─ Output: data_date (e.g., "2026-01-20")               │      │      │
+│  │  │  ├─ Retries: 2 attempts with exponential backoff         │      │      │
+│  │  │  └─ Timeout: 5 minutes                                   │      │      │
+│  │  └──────────────────────────────────────────────────────────┘      │      │
+│  │                           │                                        │      │
+│  │                           │ Wait 3s (S3 consistency)               │      │
+│  │                           ▼                                        │      │
+│  │  ┌──────────────────────────────────────────────────────────┐      │      │
+│  │  │  State 2: Process Dimensions                             │      │      │
+│  │  │  ├─ Type: Glue Job (Sync)                                │      │      │
+│  │  │  ├─ Job: build-stock-dimensions-dev                      │      │      │
+│  │  │  ├─ Parameters: --processing_date={data_date}            │      │      │
+│  │  │  ├─ Retries: 1 attempt                                   │      │      │
+│  │  │  └─ Timeout: 60 minutes                                  │      │      │
+│  │  └──────────────────────────────────────────────────────────┘      │      │
+│  │                           │                                        │      │
+│  │                           │ Wait 3s                                │      │
+│  │                           ▼                                        │      │
+│  │  ┌──────────────────────────────────────────────────────────┐      │      │
+│  │  │  State 3: Process Fact Table                             │      │      │
+│  │  │  ├─ Type: Glue Job (Sync)                                │      │      │
+│  │  │  ├─ Job: build-stock-fact-table-dev                      │      │      │
+│  │  │  ├─ Parameters: --processing_date={data_date}            │      │      │
+│  │  │  ├─ Retries: 1 attempt                                   │      │      │
+│  │  │  └─ Timeout: 60 minutes                                  │      │      │
+│  │  └──────────────────────────────────────────────────────────┘      │      │
+│  │                           │                                        │      │
+│  │                           │ Wait 3s                                │      │
+│  │                           ▼                                        │      │
+│  │  ┌──────────────────────────────────────────────────────────┐      │      │
+│  │  │  State 4: Process Aggregations                           │      │      │
+│  │  │  ├─ Type: Glue Job (Sync)                                │      │      │
+│  │  │  ├─ Job: build-stock-aggregations-dev                    │      │      │
+│  │  │  ├─ Parameters: --processing_date={data_date}            │      │      │
+│  │  │  ├─ Retries: 1 attempt                                   │      │      │
+│  │  │  └─ Timeout: 60 minutes                                  │      │      │
+│  │  └──────────────────────────────────────────────────────────┘      │      │
+│  │                           │                                        │      │
+│  │                           ▼                                        │      │
+│  │  ┌──────────────────────────────────────────────────────────┐      │      │
+│  │  │  Pipeline Succeeded ✅                                   │      │      │
+│  │  └──────────────────────────────────────────────────────────┘      │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -100,7 +100,7 @@
 │                                                                              │
 │  ┌────────────────────────────────────────────────────────────────────┐      │
 │  │  Amazon S3 (Data Lake)                                             │      │
-│  │  Bucket: nasdaq-stock-data-dev-username                            │      │
+│  │  Bucket: nasdaq-equity-batch-pipeline-data-dev-username            │      │
 │  │                                                                    │      │
 │  │  📁 raw/stock_quotes/                        (Raw JSON)            │      │
 │  │     └─ date=YYYY-MM-DD/                                            │      │
@@ -125,21 +125,21 @@
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  🔍 ANALYTICS LAYER                                                          │
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  AWS Glue Data Catalog                                             │    │
-│  │  Database: nasdaq_warehouse_dev                                    │    │
-│  │  ├─ Tables: 7 (3 dimensions + 1 fact + 3 aggregations)             │    │
-│  │  └─ Format: Apache Iceberg v2                                      │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  AWS Glue Data Catalog                                             │      │
+│  │  Database: nasdaq_warehouse_dev                                    │      │
+│  │  ├─ Tables: 7 (3 dimensions + 1 fact + 3 aggregations)             │      │
+│  │  └─ Format: Apache Iceberg v2                                      │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 │                              │                                               │
 │                              │ Queries                                       │
 │                              ▼                                               │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  Amazon Athena                                                     │    │
-│  │  ├─ Workgroup: primary                                             │    │
-│  │  ├─ Query Engine: Athena SQL                                       │    │
-│  │  └─ Cost: ~$5 per TB scanned                                       │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  Amazon Athena                                                     │      │
+│  │  ├─ Workgroup: primary                                             │      │
+│  │  ├─ Query Engine: Athena SQL                                       │      │
+│  │  └─ Cost: ~$5 per TB scanned                                       │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -148,11 +148,11 @@
 │  ┌────────────────────────────────────────────────────────────────────┐      │
 │  │  Amazon CloudWatch                                                 │      │
 │  │  ├─ Log Groups:                                                    │      │
-│  │  │  ├─ /aws/lambda/nasdaq-stock-extractor-dev                      │      │
+│  │  │  ├─ /aws/lambda/nasdaq-equity-batch-pipeline-extractor-dev      │      │
 │  │  │  ├─ /aws/glue/jobs/build-stock-dimensions-dev                   │      │
 │  │  │  ├─ /aws/glue/jobs/build-stock-fact-table-dev                   │      │
 │  │  │  ├─ /aws/glue/jobs/build-stock-aggregations-dev                 │      │
-│  │  │  └─ /aws/states/nasdaq-stock-pipeline-dev                       │      │
+│  │  │  └─ /aws/states/nasdaq-equity-batch-pipeline-dev                │      │
 │  │  ├─ Metrics:                                                       │      │
 │  │  │  ├─ Lambda: Invocations, Errors, Duration                       │      │
 │  │  │  ├─ Glue: JobRunState, JobDuration                              │      │
@@ -167,8 +167,8 @@
 │                              ▼                                               │
 │  ┌────────────────────────────────────────────────────────────────────┐      │
 │  │  Amazon SNS                                                        │      │
-│  │  Topic: nasdaq-stock-pipeline-alerts-dev                           │      │
-│  │  └─ Subscribers: Email (datageekoncloud@gmail.com)                 │      │
+│  │  Topic: nasdaq-equity-batch-pipeline-alerts-dev                    │      │
+│  │  └─ Subscribers: Email (xxxxxxxx@xxxx.com)                         │      │
 │  └────────────────────────────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────────────────────────────┘
 
@@ -203,7 +203,7 @@
 
 ### 1. Data Extraction Layer
 
-#### Lambda Function: `nasdaq-stock-extractor-dev`
+#### Lambda Function: `nasdaq-equity-batch-pipeline-extractor-dev`
 
 **Purpose**: Extract real-time stock market data from Financial Modeling Prep (FMP) API
 
@@ -213,8 +213,8 @@ Runtime: Python 3.11
 Memory: 512 MB
 Timeout: 300 seconds (5 minutes)
 Environment Variables:
-  - S3_BUCKET: nasdaq-stock-data-dev-geekytan
-  - AWS_REGION: ap-southeast-1
+  - S3_BUCKET: nasdaq-equity-batch-pipeline-data-dev-username
+  - AWS_REGION: us-east-1
   - API_SECRET_NAME: nasdaq-pipeline/fmp-api-key
 ```
 
@@ -278,7 +278,7 @@ Timeout: 60 minutes
 ```
 
 **Input**: 
-- S3 Path: `s3://nasdaq-stock-data-dev-geekytan/raw/stock_quotes/date={processing_date}/`
+- S3 Path: `s3://nasdaq-equity-batch-pipeline-data-dev-username/raw/stock_quotes/date={processing_date}/`
 - Format: JSON (multiLine=true)
 
 **Transformations**:
@@ -362,7 +362,7 @@ Timeout: 60 minutes
 ```
 
 **Input**:
-- Raw Data: `s3://nasdaq-stock-data-dev-geekytan/raw/stock_quotes/date={processing_date}/`
+- Raw Data: `s3://nasdaq-equity-batch-pipeline-data-dev-username/raw/stock_quotes/date={processing_date}/`
 - Dimension Tables: dim_stock, dim_date, dim_exchange
 
 **Transformations**:
@@ -505,7 +505,7 @@ GROUP BY sector, date
 
 #### Step Functions State Machine
 
-**Name**: `nasdaq-stock-pipeline-dev`
+**Name**: `nasdaq-equity-batch-pipeline-dev`
 
 **State Transition Graph**:
 ```
@@ -604,7 +604,7 @@ GROUP BY sector, date
 #### S3 Bucket Structure
 
 ```
-s3://nasdaq-stock-data-dev-geekytan/
+s3://nasdaq-equity-batch-pipeline-data-dev-username/
 │
 ├── raw/                                    # Raw data zone
 │   └── stock_quotes/
@@ -1010,8 +1010,8 @@ aws_iam_role.codebuild_execution
         "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::nasdaq-stock-data-dev-geekytan",
-        "arn:aws:s3:::nasdaq-stock-data-dev-geekytan/*"
+        "arn:aws:s3:::nasdaq-equity-batch-pipeline-data-dev-username",
+        "arn:aws:s3:::nasdaq-equity-batch-pipeline-data-dev-username/*"
       ]
     },
     {
@@ -1028,7 +1028,7 @@ aws_iam_role.codebuild_execution
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/nasdaq-stock-extractor-dev:*"
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/nasdaq-equity-batch-pipeline-extractor-dev:*"
     }
   ]
 }
@@ -1054,8 +1054,8 @@ aws_iam_role.codebuild_execution
         "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::nasdaq-stock-data-dev-geekytan",
-        "arn:aws:s3:::nasdaq-stock-data-dev-geekytan/*"
+        "arn:aws:s3:::nasdaq-equity-batch-pipeline-data-dev-username",
+        "arn:aws:s3:::nasdaq-equity-batch-pipeline-data-dev-username/*"
       ]
     },
     {
@@ -1107,7 +1107,7 @@ aws_iam_role.codebuild_execution
       "Action": [
         "lambda:InvokeFunction"
       ],
-      "Resource": "arn:aws:lambda:*:*:function:nasdaq-stock-extractor-dev"
+      "Resource": "arn:aws:lambda:*:*:function:nasdaq-equity-batch-pipeline-extractor-dev"
     },
     {
       "Effect": "Allow",
