@@ -98,28 +98,28 @@
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  💾 DATA STORAGE LAYER                                                       │
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  Amazon S3 (Data Lake)                                             │    │
-│  │  Bucket: nasdaq-stock-data-dev-geekytan                            │    │
-│  │                                                                    │    │
-│  │  📁 raw/stock_quotes/                        (Raw JSON)           │    │
-│  │     └─ date=YYYY-MM-DD/                                            │    │
-│  │        └─ stocks_{timestamp}.json                                  │    │
-│  │                                                                    │    │
-│  │  📁 warehouse/                               (Apache Iceberg)      │    │
-│  │     ├─ dim_stock/                                                  │    │
-│  │     ├─ dim_date/                                                   │    │
-│  │     ├─ dim_exchange/                                               │    │
-│  │     ├─ fact_stock_daily_price/                                     │    │
-│  │     ├─ agg_weekly_performance/                                     │    │
-│  │     ├─ agg_monthly_performance/                                    │    │
-│  │     └─ agg_sector_performance/                                     │    │
-│  │                                                                    │    │
-│  │  📁 glue-scripts/                            (ETL Code)            │    │
-│  │     ├─ build_stock_dimensions.py                                   │    │
-│  │     ├─ build_stock_fact_table.py                                   │    │
-│  │     └─ build_stock_aggregations.py                                 │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  Amazon S3 (Data Lake)                                             │      │
+│  │  Bucket: nasdaq-stock-data-dev-username                            │      │
+│  │                                                                    │      │
+│  │  📁 raw/stock_quotes/                        (Raw JSON)            │      │
+│  │     └─ date=YYYY-MM-DD/                                            │      │
+│  │        └─ stocks_{timestamp}.json                                  │      │
+│  │                                                                    │      │
+│  │  📁 warehouse/                               (Apache Iceberg)      │      │
+│  │     ├─ dim_stock/                                                  │      │
+│  │     ├─ dim_date/                                                   │      │
+│  │     ├─ dim_exchange/                                               │      │
+│  │     ├─ fact_stock_daily_price/                                     │      │
+│  │     ├─ agg_weekly_performance/                                     │      │
+│  │     ├─ agg_monthly_performance/                                    │      │
+│  │     └─ agg_sector_performance/                                     │      │
+│  │                                                                    │      │
+│  │  📁 glue-scripts/                            (ETL Code)            │      │
+│  │     ├─ build_stock_dimensions.py                                   │      │
+│  │     ├─ build_stock_fact_table.py                                   │      │
+│  │     └─ build_stock_aggregations.py                                 │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -145,55 +145,55 @@
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  📊 MONITORING & ALERTING                                                    │
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  Amazon CloudWatch                                                 │    │
-│  │  ├─ Log Groups:                                                    │    │
-│  │  │  ├─ /aws/lambda/nasdaq-stock-extractor-dev                      │    │
-│  │  │  ├─ /aws/glue/jobs/build-stock-dimensions-dev                   │    │
-│  │  │  ├─ /aws/glue/jobs/build-stock-fact-table-dev                   │    │
-│  │  │  ├─ /aws/glue/jobs/build-stock-aggregations-dev                 │    │
-│  │  │  └─ /aws/states/nasdaq-stock-pipeline-dev                       │    │
-│  │  ├─ Metrics:                                                       │    │
-│  │  │  ├─ Lambda: Invocations, Errors, Duration                       │    │
-│  │  │  ├─ Glue: JobRunState, JobDuration                              │    │
-│  │  │  └─ Step Functions: ExecutionsSucceeded, ExecutionsFailed       │    │
-│  │  └─ Alarms:                                                        │    │
-│  │     ├─ Lambda execution failures                                   │    │
-│  │     ├─ Glue job failures                                           │    │
-│  │     └─ Step Functions execution failures                           │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  Amazon CloudWatch                                                 │      │
+│  │  ├─ Log Groups:                                                    │      │
+│  │  │  ├─ /aws/lambda/nasdaq-stock-extractor-dev                      │      │
+│  │  │  ├─ /aws/glue/jobs/build-stock-dimensions-dev                   │      │
+│  │  │  ├─ /aws/glue/jobs/build-stock-fact-table-dev                   │      │
+│  │  │  ├─ /aws/glue/jobs/build-stock-aggregations-dev                 │      │
+│  │  │  └─ /aws/states/nasdaq-stock-pipeline-dev                       │      │
+│  │  ├─ Metrics:                                                       │      │
+│  │  │  ├─ Lambda: Invocations, Errors, Duration                       │      │
+│  │  │  ├─ Glue: JobRunState, JobDuration                              │      │
+│  │  │  └─ Step Functions: ExecutionsSucceeded, ExecutionsFailed       │      │
+│  │  └─ Alarms:                                                        │      │
+│  │     ├─ Lambda execution failures                                   │      │
+│  │     ├─ Glue job failures                                           │      │
+│  │     └─ Step Functions execution failures                           │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 │                              │                                               │
 │                              │ Triggers on Failure                           │
 │                              ▼                                               │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  Amazon SNS                                                        │    │
-│  │  Topic: nasdaq-stock-pipeline-alerts-dev                           │    │
-│  │  └─ Subscribers: Email (datageekoncloud@gmail.com)                 │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  Amazon SNS                                                        │      │
+│  │  Topic: nasdaq-stock-pipeline-alerts-dev                           │      │
+│  │  └─ Subscribers: Email (datageekoncloud@gmail.com)                 │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  🔄 CI/CD LAYER                                                              │
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  GitHub Repository                                                 │    │
-│  │  ├─ Webhook: Push events to main branch                            │    │
-│  │  └─ Triggers: AWS CodeBuild                                        │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  GitHub Repository                                                 │      │
+│  │  ├─ Webhook: Push events to main branch                            │      │
+│  │  └─ Triggers: AWS CodeBuild                                        │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 │                              │                                               │
 │                              ▼                                               │
-│  ┌────────────────────────────────────────────────────────────────────┐    │
-│  │  AWS CodeBuild                                                     │    │
-│  │  ├─ CI Pipeline (buildspec-ci.yml):                                │    │
-│  │  │  ├─ Validate Python syntax                                      │    │
-│  │  │  ├─ Package Lambda function                                     │    │
-│  │  │  ├─ Copy Glue scripts                                           │    │
-│  │  │  └─ Upload to S3 artifacts bucket                               │    │
-│  │  └─ CD Pipeline (buildspec-cd.yml):                                │    │
-│  │     ├─ Download artifacts from S3                                  │    │
-│  │     ├─ Update Lambda function code                                 │    │
-│  │     └─ Sync Glue scripts to S3                                     │    │
-│  └────────────────────────────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────────────────────────────┐      │
+│  │  AWS CodeBuild                                                     │      │
+│  │  ├─ CI Pipeline (buildspec-ci.yml):                                │      │
+│  │  │  ├─ Validate Python syntax                                      │      │
+│  │  │  ├─ Package Lambda function                                     │      │
+│  │  │  ├─ Copy Glue scripts                                           │      │
+│  │  │  └─ Upload to S3 artifacts bucket                               │      │
+│  │  └─ CD Pipeline (buildspec-cd.yml):                                │      │
+│  │     ├─ Download artifacts from S3                                  │      │
+│  │     ├─ Update Lambda function code                                 │      │
+│  │     └─ Sync Glue scripts to S3                                     │      │
+│  └────────────────────────────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
