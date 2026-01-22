@@ -1,0 +1,73 @@
+version: 0.2
+
+env:
+  variables:
+    PYTHON_VERSION: "3.11"
+    ARTIFACTS_BUCKET: "nasdaq-equity-batch-pipeline-codebuild-artifacts-dev"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - echo "Verifying moto installation..."
+      - python -c "import moto; print('Moto installed successfully')"
+
+  pre_build:
+    commands:
+      - echo "Pre-build validation..."
+      - python --version
+      - pip list | grep -E "moto|pytest|boto3"
+
+  build:
+    commands:
+      - echo "Running tests..."
+      - pytest tests/ -v --cov=lambda --cov=glue --cov-report=term-missing
+      - echo "Validating Glue scripts..."
+      - python -m py_compile glue/jobs/build_stock_dimensions.py
+      - python -m py_compile glue/jobs/build_stock_fact_table.py
+      - python -m py_compile glue/jobs/build_stock_aggregations.py
+      - echo "Validating Airflow DAG (if exists)..."
+      - test -f airflow/dags/nasdaq_pipeline_dag.py && python -m py_compile airflow/dags/nasdaq_pipeline_dag.py || echo "Airflow DAG not found - skipping validation"
+      - echo "Creating build directories..."
+      - mkdir -p build/lambda
+      - mkdir -p build/glue-scripts
+      - mkdir -p build/airflow-dags
+      - echo "Packaging Lambda function..."
+      - chmod +x cicd/scripts/package-lambda.sh
+      - ./cicd/scripts/package-lambda.sh
+      - echo "Copying Glue scripts..."
+      - cp glue/jobs/*.py build/glue-scripts/
+      - echo "Copying Airflow DAGs (if exist)..."
+      - test -d airflow/dags && cp airflow/dags/*.py build/airflow-dags/ || echo "No Airflow DAGs to copy"
+
+  post_build:
+    commands:
+      - echo "============================================"
+      - echo "Uploading Artifacts to S3"
+      - echo "============================================"
+      - echo "Uploading Lambda package..."
+      - aws s3 cp build/lambda/lambda-function.zip s3://${ARTIFACTS_BUCKET}/lambda/lambda-function.zip
+      - echo "Uploading Glue scripts..."
+      - aws s3 sync build/glue-scripts/ s3://${ARTIFACTS_BUCKET}/glue-scripts/
+      - echo "Uploading Airflow DAGs..."
+      - test -d build/airflow-dags && aws s3 sync build/airflow-dags/ s3://${ARTIFACTS_BUCKET}/airflow-dags/ || echo "No Airflow DAGs to upload"
+      - echo "============================================"
+      - echo "Build Summary"
+      - echo "============================================"
+      - test -f build/lambda/lambda-function.zip && du -sh build/lambda/lambda-function.zip || echo "Lambda package not found"
+      - test -d build/glue-scripts/ && du -sh build/glue-scripts/ || echo "Glue scripts not found"
+      - echo "Artifacts uploaded to s3://${ARTIFACTS_BUCKET}/"
+      - echo "Build completed successfully!"
+
+artifacts:
+  files:
+    - build/**/*
+  name: ci-artifacts
+
+cache:
+  paths:
+    - /root/.cache/pip/**/*

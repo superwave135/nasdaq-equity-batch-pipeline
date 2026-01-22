@@ -1,0 +1,203 @@
+# ============================================================================
+# NASDAQ Stock Pipeline - .gitignore
+# ============================================================================
+
+# ============================================================================
+# BUILD ARTIFACTS - These are generated files that shouldn't be in git
+# ============================================================================
+
+# Lambda deployment packages (NEVER commit these - they're built by CI/CD)
+*.zip
+lambda_deployment_package.zip
+deployed-lambda.zip
+
+# Lambda build directory
+lambda/build/*
+!lambda/build/.gitkeep
+
+# Python bytecode
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================================================
+# TERRAFORM STATE FILES - These contain sensitive infrastructure state
+# ============================================================================
+
+# State files (CRITICAL: Never commit these to public repos!)
+*.tfstate
+*.tfstate.*
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfstate.*.backup
+
+# Crash log files
+crash.log
+
+# Terraform variable files that might contain secrets
+# (Keep terraform.tfvars.example but ignore actual tfvars)
+terraform.tfvars
+*.auto.tfvars
+environments/*.tfvars
+environments/dev.tfvars
+environments/prod.tfvars
+
+# Terraform CLI config files
+.terraformrc
+terraform.rc
+
+# Terraform directories
+.terraform/
+.terraform.lock.hcl
+
+# ============================================================================
+# AWS & SECRETS - Never commit credentials or sensitive data
+# ============================================================================
+
+# AWS credentials
+.aws/
+*.pem
+*.key
+
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# Secrets
+secrets.json
+*secret*
+*password*
+
+# ============================================================================
+# IDE & EDITOR FILES
+# ============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================================================
+# OS FILES
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================================================
+# LOGS & TEMPORARY FILES
+# ============================================================================
+
+# Logs
+*.log
+logs/
+*.out
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# Response files (test outputs - optionally ignore these)
+response.json
+response_real.json
+payload.json
+
+# ============================================================================
+# DATA FILES - Don't commit large data files
+# ============================================================================
+
+# Data directories (configure per project needs)
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.json.gz
+
+# ============================================================================
+# DOCUMENTATION BUILD ARTIFACTS
+# ============================================================================
+
+# Sphinx documentation
+docs/_build/
+docs/.doctrees/
+
+# MkDocs
+site/
+
+# ============================================================================
+# EXCEPTIONS - Files to KEEP even if they match ignore patterns
+# ============================================================================
+
+# Keep example/template files
+!.env.example
+!terraform.tfvars.example
+!config.example.yaml
+!environments/*.tfvars.example
+
+# Keep .gitkeep files to preserve empty directories
+!.gitkeep
+!**/.gitkeep

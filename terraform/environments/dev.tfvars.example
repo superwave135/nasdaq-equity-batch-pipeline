@@ -1,0 +1,49 @@
+# dev.tfvars.example
+# NASDAQ Equity Batch Pipeline - Development Environment Configuration Template
+#
+# INSTRUCTIONS:
+# 1. Copy this file to dev.tfvars
+# 2. Fill in your actual values
+# 3. NEVER commit dev.tfvars to git (it's in .gitignore)
+
+# ============================================================================
+# CORE CONFIGURATION
+# ============================================================================
+
+environment         = "dev"                         # Environment identifier
+aws_region         = "us-east-1"                    # AWS region
+s3_bucket_name     = "your-bucket-name-here"        # Must be globally unique
+glue_database_name = "your_database_name"           # Glue catalog database
+alert_email        = "your-email@example.com"       # Alert notification email
+log_retention_days = 7                              # Log retention period
+
+# ============================================================================
+# GITHUB CI/CD CONFIGURATION
+# ============================================================================
+
+github_repo_url = "https://github.com/your-username/your-repo"  # Repository URL
+github_branch   = "main"                                         # Default branch
+github_token    = "YOUR_GITHUB_TOKEN_HERE"                      # Personal Access Token
+ec2_instance_id = ""                                             # For Airflow (optional)
+
+# ⚠️ SECURITY BEST PRACTICE:
+# Instead of hardcoding the token here, store it in AWS Secrets Manager:
+#
+# aws secretsmanager create-secret \
+#     --name "nasdaq-pipeline/github-token" \
+#     --secret-string "your-token-here" \
+#     --region ap-southeast-1
+#
+# Then reference it in your Terraform code using data.aws_secretsmanager_secret
+
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# Development Environment Recommendations:
+# - Use shorter log retention (7 days) to save costs
+# - Test with smaller stock lists first
+# - Enable verbose logging for debugging
+# - Use manual orchestration initially
+#
+# ============================================================================

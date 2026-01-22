@@ -1,0 +1,99 @@
+version: 0.2
+
+env:
+  variables:
+    ENVIRONMENT: "dev"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing AWS CLI..."
+      - pip install --upgrade awscli
+
+  pre_build:
+    commands:
+      - echo "============================================"
+      - echo "CD Pipeline - Deployment"
+      - echo "============================================"
+      - echo "Environment - ${ENVIRONMENT}"
+      - echo "Lambda Function - ${LAMBDA_FUNCTION_NAME}"
+      - echo "S3 Bucket - ${S3_BUCKET}"
+      - echo "Region - ${AWS_REGION}"
+
+  build:
+    commands:
+      - echo "============================================"
+      - echo "Deploying Lambda Function"
+      - echo "============================================"
+      - echo "Downloading Lambda package from CI artifacts..."
+      - aws s3 cp s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/lambda/lambda-function.zip ./lambda-function.zip
+      - echo "Updating Lambda function code..."
+      - aws lambda update-function-code --function-name ${LAMBDA_FUNCTION_NAME} --zip-file fileb://lambda-function.zip --region ${AWS_REGION}
+      - echo "Waiting for Lambda update to complete..."
+      - aws lambda wait function-updated --function-name ${LAMBDA_FUNCTION_NAME} --region ${AWS_REGION}
+      - echo "Lambda deployment completed!"
+      - echo "============================================"
+      - echo "Deploying Glue Scripts"
+      - echo "============================================"
+      - echo "Downloading Glue scripts from CI artifacts..."
+      - aws s3 sync s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/glue-scripts/ ./glue-scripts/
+      - echo "Uploading Glue scripts to data bucket..."
+      - aws s3 sync ./glue-scripts/ s3://${S3_BUCKET}/glue-scripts/
+      - echo "Glue scripts deployment completed!"
+      - echo "============================================"
+      - echo "Deploying EventBridge Schedule (if configured)"
+      - echo "============================================"
+      - |
+        if [ ! -z "${EVENTBRIDGE_RULE_NAME}" ]; then
+          echo "EventBridge Rule: ${EVENTBRIDGE_RULE_NAME}"
+          aws events describe-rule --name ${EVENTBRIDGE_RULE_NAME} --region ${AWS_REGION}
+          echo "EventBridge deployment skipped (managed by Terraform)"
+          echo "To update schedule, run: terraform apply"
+        else
+          echo "No EventBridge rule configured - skipping"
+        fi
+      - echo "============================================"
+      - echo "Deploying Step Functions (if configured)"
+      - echo "============================================"
+      - |
+        if [ ! -z "${STATE_MACHINE_ARN}" ]; then
+          echo "State Machine: ${STATE_MACHINE_NAME}"
+          aws stepfunctions describe-state-machine --state-machine-arn ${STATE_MACHINE_ARN} --region ${AWS_REGION} --query 'name'
+          echo "Step Functions deployment skipped (managed by Terraform)"
+          echo "To update state machine, run: terraform apply"
+        else
+          echo "No Step Functions configured - skipping"
+        fi
+
+  post_build:
+    commands:
+      - echo "============================================"
+      - echo "Deployment Summary"
+      - echo "============================================"
+      - echo "Lambda Function - ${LAMBDA_FUNCTION_NAME} - Updated"
+      - aws lambda get-function --function-name ${LAMBDA_FUNCTION_NAME} --region ${AWS_REGION} --query 'Configuration.LastModified'
+      - echo "Glue Scripts - Deployed to s3://${S3_BUCKET}/glue-scripts/"
+      # Orchestration resource reference (logging only)
+      - echo "============================================"
+      - echo "Orchestration Resources (Managed by Terraform)"
+      - echo "============================================"
+      - |
+        if [ ! -z "${EVENTBRIDGE_RULE_NAME}" ]; then
+          echo "EventBridge Rule: ${EVENTBRIDGE_RULE_NAME}"
+          echo "  Note: Schedule changes managed by Terraform"
+        fi
+      - |
+        if [ ! -z "${STATE_MACHINE_NAME}" ]; then
+          echo "Step Functions: ${STATE_MACHINE_NAME}"
+          echo "  Note: State machine updates managed by Terraform"
+        fi
+      - echo "============================================"
+      - echo "Deployment Complete!"
+      - echo "============================================"
+
+artifacts:
+  files:
+    - '**/*'
+  name: cd-deployment-artifacts

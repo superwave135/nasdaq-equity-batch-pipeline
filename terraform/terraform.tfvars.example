@@ -1,0 +1,102 @@
+# terraform.tfvars.example
+# NASDAQ Stock Pipeline - Configuration Template
+#
+# INSTRUCTIONS:
+# 1. Copy this file to terraform.tfvars
+# 2. Fill in your actual values
+# 3. NEVER commit terraform.tfvars to git (it's in .gitignore)
+
+# ============================================================================
+# CORE CONFIGURATION
+# ============================================================================
+
+environment         = "dev"                         # Environment: dev, staging, prod
+aws_region         = "us-east-1"                    # AWS region for deployment
+s3_bucket_name     = "your-bucket-name-here"        # S3 bucket for data storage
+glue_database_name = "your_database_name"           # Glue catalog database name
+alert_email        = "your-email@example.com"       # Email for CloudWatch alerts
+log_retention_days = 7                              # CloudWatch log retention (days)
+
+# ============================================================================
+# GITHUB CI/CD CONFIGURATION
+# ============================================================================
+
+github_repo_url = "https://github.com/your-username/your-repo"  # Your GitHub repo URL
+github_branch   = "main"                                         # Branch to deploy from
+github_token    = "YOUR_GITHUB_TOKEN_HERE"                      # GitHub Personal Access Token (NEVER commit!)
+ec2_instance_id = ""                                             # EC2 instance for Airflow (if using)
+
+# SECURITY WARNING:
+# Store your GitHub token in AWS Secrets Manager instead of hardcoding it here!
+# Example: aws secretsmanager create-secret --name "nasdaq-equity-batch-pipeline/github-token" --secret-string "ghp_xxxx"
+
+# ============================================================================
+# ORCHESTRATION CONFIGURATION (EventBridge + Step Functions)
+# ============================================================================
+
+# Enable/Disable Orchestration
+# Set to true to add Step Functions + EventBridge orchestration
+# Set to false to keep existing manual orchestration only
+enable_orchestration = true
+
+# Schedule Expression
+# Daily at 10:30 AM Singapore Time (02:30 AM UTC)
+# Format: cron(Minutes Hours Day Month DayOfWeek Year)
+orchestration_schedule = "cron(30 2 * * ? *)"
+
+# Common schedule expressions:
+# - Daily at 9:30 AM SGT:     "cron(30 1 * * ? *)"
+# - Daily at 6:30 PM SGT:     "cron(30 10 * * ? *)"
+# - Weekdays only:            "cron(30 10 ? * MON-FRI *)"
+# - Every hour (testing):     "cron(0 * * * ? *)"
+# - Every 30 minutes:         "rate(30 minutes)"
+
+# Schedule Control
+# Start with this disabled for initial testing
+# Enable after verifying manual triggers work correctly
+orchestration_schedule_enabled = true
+
+# Retry Configuration
+# How many times to retry on transient failures
+orchestration_lambda_retries = 2  # Retry Lambda up to 2 times
+orchestration_glue_retries   = 1  # Retry Glue jobs up to 1 time
+
+# Logging Configuration
+enable_orchestration_logging    = true  # Enable CloudWatch Logs
+orchestration_log_retention_days = 30   # Keep logs for 30 days
+
+# Monitoring Configuration
+enable_orchestration_monitoring = true                # Enable CloudWatch Alarms
+orchestration_timeout_threshold_ms = 3600000  # 60 minutes (matches Glue timeout)
+
+# ============================================================================
+# DEPLOYMENT NOTES
+# ============================================================================
+#
+# PHASE 1 - CURRENT STATE (No Changes):
+#   - enable_orchestration = false
+#   - Your existing infrastructure unchanged
+#   - Continue using manual orchestration scripts
+#
+# PHASE 2 - TEST ORCHESTRATION:
+#   Step 1: Deploy Infrastructure
+#     - Set enable_orchestration = true
+#     - Keep orchestration_schedule_enabled = false
+#     - Run: terraform apply
+#     - Expected: +12 new resources created
+#
+#   Step 2: Test Manually
+#     - Trigger manually via AWS Console or CLI
+#     - Verify: All 4 stages complete successfully
+#     - Check: Data appears in Athena
+#
+#   Step 3: Enable Schedule
+#     - Set orchestration_schedule_enabled = true
+#     - Run: terraform apply
+#
+# PHASE 3 - PRODUCTION:
+#   - Monitor automated runs for 1 week
+#   - Adjust retry/timeout settings as needed
+#   - Keep manual scripts as backup
+#
+# ============================================================================
