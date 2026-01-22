@@ -258,7 +258,7 @@ https://financialmodelingprep.com/stable/quote?symbol={SYMBOL}&apikey={API_KEY}
 # Read raw JSON data
 raw_df = spark.read \
     .option("multiLine", "true") \
-    .json("s3://nasdaq-stock-data-dev-username/raw/stock_quotes/date=*/")
+    .json("s3://nasdaq-equity-batch-pipeline-data-dev-username/raw/stock_quotes/date=*/")
 
 # Sample raw data structure:
 # [
@@ -432,7 +432,7 @@ processing_date = args['processing_date']  # e.g., "2026-01-20"
 
 # Read only today's raw data
 raw_df = spark.read.option("multiLine", "true").json(
-    f"s3://nasdaq-stock-data-dev-username/raw/stock_quotes/date={processing_date}/"
+    f"s3://nasdaq-equity-batch-pipeline-data-dev-username/raw/stock_quotes/date={processing_date}/"
 )
 
 # Read dimension tables
