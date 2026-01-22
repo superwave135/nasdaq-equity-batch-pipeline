@@ -1203,4 +1203,4 @@ git push origin main
 
 **Deployment Guide Version**: 1.0  
 **Last Updated**: January 21, 2026  
-**Tested On**: AWS Academy, Personal AWS Accounts
+**Tested On**: Personal AWS Accounts
