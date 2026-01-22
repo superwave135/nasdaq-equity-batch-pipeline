@@ -46,21 +46,21 @@ This project implements an **automated, scalable data pipeline** that extracts r
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    EVENT-DRIVEN SERVERLESS PIPELINE                  │
+│                    EVENT-DRIVEN SERVERLESS PIPELINE                 │
 └─────────────────────────────────────────────────────────────────────┘
 
-┌──────────────┐      ┌───────────────────────────────────────────┐
+┌──────────────┐       ┌───────────────────────────────────────────┐
 │ EventBridge  │──────>│   Step Functions State Machine            │
-│ (Scheduler)  │      │   ┌─────────────────────────────────────┐ │
-│ Daily 10:30  │      │   │ 1. Lambda: Extract Stock Data       │ │
-│ AM SGT       │      │   │    └─> FMP API → S3 Raw (JSON)      │ │
-└──────────────┘      │   ├─────────────────────────────────────┤ │
+│ (Scheduler)  │       │   ┌─────────────────────────────────────┐ │
+│ Daily 10:30  │       │   │ 1. Lambda: Extract Stock Data       │ │
+│ AM SGT       │       │   │    └─> FMP API → S3 Raw (JSON)      │ │
+└──────────────┘       │   ├─────────────────────────────────────┤ │
                        │   │ 2. Glue: Build Dimension Tables     │ │
                        │   │    └─> dim_stock, dim_date, etc.    │ │
                        │   ├─────────────────────────────────────┤ │
                        │   │ 3. Glue: Build Fact Table           │ │
                        │   │    └─> fact_stock_daily_price       │ │
-                       │   │        (24 metrics + derived calc)   │ │
+                       │   │        (24 metrics + derived calc)  │ │
                        │   ├─────────────────────────────────────┤ │
                        │   │ 4. Glue: Build Aggregations         │ │
                        │   │    └─> Weekly/Monthly/Sector views  │ │
@@ -102,13 +102,13 @@ This project implements an **automated, scalable data pipeline** that extracts r
                         │
          ┌──────────────┼──────────────┐
          │              │              │
-    ┌────▼────┐   ┌─────▼──────┐  ┌───▼────────┐
-    │dim_date │   │    FACT    │  │dim_exchange│
-    ├─────────┤   │stock_daily │  ├────────────┤
+    ┌────▼────┐   ┌─────▼──────┐  ┌───▼─────────┐
+    │dim_date │   │    FACT    │  │dim_exchange │
+    ├─────────┤   │stock_daily │  ├─────────────┤
     │date_key │◄──┤   _price   │──►│exchange_key│
-    │calendar │   ├────────────┤  │exchange    │
-    │year/qtr │   │ 24 metrics │  │timezone    │
-    │month    │   │ • Prices   │  └────────────┘
+    │calendar │   ├────────────┤  │exchange     │
+    │year/qtr │   │ 24 metrics │  │timezone     │
+    │month    │   │ • Prices   │  └─────────────┘
     │flags    │   │ • Volume   │
     └─────────┘   │ • Derived  │
                   └────────────┘
@@ -601,7 +601,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact & Support
 
 ### Author
-**Your Name** - Data Engineering Portfolio Project
+**GeekyTan** - Data Engineering Portfolio Project
 
 ### Get Help
 - **GitHub Issues**: [Create an issue](https://github.com/yourusername/nasdaq-equity-batch-pipeline/issues)
