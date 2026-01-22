@@ -87,9 +87,9 @@ This CI/CD pipeline automates the build, test, and deployment process for the NA
           │                              │
 ┌─────────┼──────────────────────────────┼────────────────────┐
 │         │      SOURCE CONTROL          │                    │
-│  ┌──────┴───────────────────────────────┴──────┐           │
+│  ┌──────┴──────────────────────────────┴──────┐           │
 │  │          GitHub Repository                   │           │
-│  │  (nasdaq-stock-pipeline)                     │           │
+│  │  (nasdaq-equity-batch-pipeline)              │           │
 │  └──────────────────────────────────────────────┘           │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -108,7 +108,7 @@ This CI/CD pipeline automates the build, test, and deployment process for the NA
 
 ### 1. CI Project (Continuous Integration)
 
-**Name:** `nasdaq-stock-pipeline-ci-dev`  
+**Name:** `nasdaq-equity-batch-pipeline-ci-dev`  
 **Purpose:** Build, test, and package application code  
 **Trigger:** GitHub webhook (automatic on push to `main` branch)  
 **Buildspec:** `cicd/buildspec-ci.yml`
@@ -123,13 +123,13 @@ This CI/CD pipeline automates the build, test, and deployment process for the NA
 **Environment Variables:**
 ```yaml
 ENVIRONMENT:  dev
-AWS_REGION:   ap-southeast-1
-S3_BUCKET:    nasdaq-stock-data-dev-geekytan
+AWS_REGION:   us-east-1
+S3_BUCKET:    nasdaq-equity-batch-pipeline-data-dev-username
 ```
 
 **Artifacts Produced:**
 ```
-s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/
+s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/
 ├── lambda/
 │   └── lambda-function.zip
 └── glue-scripts/
@@ -142,7 +142,7 @@ s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/
 
 ### 2. CD Project (Continuous Deployment)
 
-**Name:** `nasdaq-stock-pipeline-cd-dev`  
+**Name:** `nasdaq-equity-batch-pipeline-cd-dev`  
 **Purpose:** Deploy packaged code to AWS infrastructure  
 **Trigger:** Manual (AWS CLI or Console)  
 **Buildspec:** `cicd/buildspec-cd.yml`
@@ -157,33 +157,33 @@ s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/
 **Environment Variables:**
 ```yaml
 ENVIRONMENT:           dev
-AWS_REGION:            ap-southeast-1
-LAMBDA_FUNCTION_NAME:  nasdaq-stock-extractor-dev-geekytan
-S3_BUCKET:             nasdaq-stock-data-dev-geekytan
+AWS_REGION:            us-east-1
+LAMBDA_FUNCTION_NAME:  nasdaq-equity-batch-pipeline-extractor-dev-username
+S3_BUCKET:             nasdaq-equity-batch-pipeline-data-dev-username
 EC2_INSTANCE_ID:       (optional - for Airflow)
-EVENTBRIDGE_RULE_NAME: nasdaq-stock-pipeline-daily-trigger-dev
-STATE_MACHINE_ARN:     arn:aws:states:ap-southeast-1:...:stateMachine:...
-STATE_MACHINE_NAME:    nasdaq-stock-pipeline-orchestrator-dev
+EVENTBRIDGE_RULE_NAME: nasdaq-equity-batch-pipeline-daily-trigger-dev
+STATE_MACHINE_ARN:     arn:aws:states:us-east-1:...:stateMachine:...
+STATE_MACHINE_NAME:    nasdaq-equity-batch-pipeline-orchestrator-dev
 ```
 
 **Deployment Targets:**
 ```
 Lambda Function:
-  └── nasdaq-stock-extractor-dev-geekytan
+  └── nasdaq-equity-batch-pipeline-extractor-dev-username
 
 S3 Bucket (Glue Scripts):
-  └── s3://nasdaq-stock-data-dev-geekytan/glue-scripts/
+  └── s3://nasdaq-equity-batch-pipeline-data-dev-username/glue-scripts/
 
 Orchestration (Read-Only Logging):
-  ├── EventBridge Rule: nasdaq-stock-pipeline-daily-trigger-dev
-  └── Step Functions:   nasdaq-stock-pipeline-orchestrator-dev
+  ├── EventBridge Rule: nasdaq-equity-batch-pipeline-daily-trigger-dev
+  └── Step Functions:   nasdaq-equity-batch-pipeline-orchestrator-dev
 ```
 
 ---
 
 ### 3. S3 Artifacts Bucket
 
-**Name:** `nasdaq-stock-pipeline-codebuild-artifacts-dev`  
+**Name:** `nasdaq-equity-batch-pipeline-codebuild-artifacts-dev`  
 **Purpose:** Interface between CI and CD (artifact storage)
 
 **Features:**
@@ -194,7 +194,7 @@ Orchestration (Read-Only Logging):
 
 **Structure:**
 ```
-nasdaq-stock-pipeline-codebuild-artifacts-dev/
+nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/
 ├── lambda/                    # Lambda deployment packages
 │   └── lambda-function.zip
 ├── glue-scripts/              # Glue ETL scripts
@@ -259,7 +259,7 @@ module "github_webhook" {
    Required information:
    - AWS Access Key ID
    - AWS Secret Access Key
-   - Default region: `ap-southeast-1`
+   - Default region: `us-east-1`
    - Output format: `json`
 
 2. **Required IAM Permissions**
@@ -309,16 +309,16 @@ terraform apply
 ```bash
 # Check CI project
 aws codebuild batch-get-projects \
-  --names nasdaq-stock-pipeline-ci-dev \
-  --region ap-southeast-1
+  --names nasdaq-equity-batch-pipeline-ci-dev \
+  --region us-east-1
 
 # Check CD project
 aws codebuild batch-get-projects \
-  --names nasdaq-stock-pipeline-cd-dev \
-  --region ap-southeast-1
+  --names nasdaq-equity-batch-pipeline-cd-dev \
+  --region us-east-1
 
 # Check artifacts bucket
-aws s3 ls s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/
+aws s3 ls s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/
 ```
 
 ### 3. Test GitHub Webhook
@@ -362,13 +362,13 @@ CD requires **manual triggering** for controlled deployments:
 ```bash
 # Basic deployment
 aws codebuild start-build \
-  --project-name nasdaq-stock-pipeline-cd-dev \
-  --region ap-southeast-1
+  --project-name nasdaq-equity-batch-pipeline-cd-dev \
+  --region us-east-1
 
 # Get build ID and monitor
 BUILD_ID=$(aws codebuild start-build \
-  --project-name nasdaq-stock-pipeline-cd-dev \
-  --region ap-southeast-1 \
+  --project-name nasdaq-equity-batch-pipeline-cd-dev \
+  --region us-east-1 \
   --query 'build.id' \
   --output text)
 
@@ -377,7 +377,7 @@ echo "Build ID: $BUILD_ID"
 # Check build status
 aws codebuild batch-get-builds \
   --ids $BUILD_ID \
-  --region ap-southeast-1 \
+  --region us-east-1 \
   --query 'builds[0].buildStatus' \
   --output text
 ```
@@ -385,7 +385,7 @@ aws codebuild batch-get-builds \
 #### Method 2: AWS Console
 
 1. Navigate to AWS Console → CodeBuild
-2. Find `nasdaq-stock-pipeline-cd-dev`
+2. Find `nasdaq-equity-batch-pipeline-cd-dev`
 3. Click **"Start build"**
 4. Monitor progress in real-time
 
@@ -399,8 +399,8 @@ Create `scripts/deploy.sh`:
 set -e
 
 ENVIRONMENT=${1:-dev}
-PROJECT_NAME="nasdaq-stock-pipeline"
-REGION="ap-southeast-1"
+PROJECT_NAME="nasdaq-equity-batch-pipeline"
+REGION="us-east-1"
 
 echo "🚀 Starting CD deployment for $ENVIRONMENT..."
 
@@ -498,8 +498,8 @@ Result: ✅ Artifacts ready in S3
 
 Developer/DevOps:
   aws codebuild start-build \
-    --project-name nasdaq-stock-pipeline-cd-dev \
-    --region ap-southeast-1
+    --project-name nasdaq-equity-batch-pipeline-cd-dev \
+    --region us-east-1
 
 CD Process (buildspec-cd.yml):
   ┌─────────────────────────────────────────┐
@@ -573,17 +573,17 @@ git push origin main
 # Step 3: Verify CI succeeded
 aws codebuild batch-get-builds \
   --ids <BUILD_ID> \
-  --region ap-southeast-1
+  --region us-east-1
 
 # Step 4: Trigger CD (manual)
 aws codebuild start-build \
-  --project-name nasdaq-stock-pipeline-cd-dev \
-  --region ap-southeast-1
+  --project-name nasdaq-equity-batch-pipeline-cd-dev \
+  --region us-east-1
 
 # Step 5: Verify deployment
 aws lambda get-function \
-  --function-name nasdaq-stock-extractor-dev-geekytan \
-  --region ap-southeast-1 \
+  --function-name nasdaq-equity-batch-pipeline-extractor-dev-username \
+  --region us-east-1 \
   --query 'Configuration.LastModified'
 ```
 
@@ -593,24 +593,24 @@ If you need to rollback to a previous version:
 
 ```bash
 # Step 1: Find the artifact version you want
-aws s3 ls s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/lambda/ \
+aws s3 ls s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/lambda/ \
   --recursive
 
 # Step 2: Download specific version (if versioning enabled)
 aws s3api list-object-versions \
-  --bucket nasdaq-stock-pipeline-codebuild-artifacts-dev \
+  --bucket nasdaq-equity-batch-pipeline-codebuild-artifacts-dev \
   --prefix lambda/lambda-function.zip
 
 # Step 3: Restore specific version
 aws s3api copy-object \
-  --bucket nasdaq-stock-pipeline-codebuild-artifacts-dev \
-  --copy-source nasdaq-stock-pipeline-codebuild-artifacts-dev/lambda/lambda-function.zip?versionId=VERSION_ID \
+  --bucket nasdaq-equity-batch-pipeline-codebuild-artifacts-dev \
+  --copy-source nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/lambda/lambda-function.zip?versionId=VERSION_ID \
   --key lambda/lambda-function.zip
 
 # Step 4: Trigger CD to deploy old artifact
 aws codebuild start-build \
-  --project-name nasdaq-stock-pipeline-cd-dev \
-  --region ap-southeast-1
+  --project-name nasdaq-equity-batch-pipeline-cd-dev \
+  --region us-east-1
 ```
 
 ### Hotfix Deployment
@@ -645,14 +645,14 @@ git push origin main
 ```bash
 # Get latest CI build ID
 BUILD_ID=$(aws codebuild list-builds-for-project \
-  --project-name nasdaq-stock-pipeline-ci-dev \
-  --region ap-southeast-1 \
+  --project-name nasdaq-equity-batch-pipeline-ci-dev \
+  --region us-east-1 \
   --max-items 1 \
   --query 'ids[0]' \
   --output text)
 
 # View build logs
-aws logs tail /aws/codebuild/nasdaq-stock-pipeline-ci-dev \
+aws logs tail /aws/codebuild/nasdaq-equity-batch-pipeline-ci-dev \
   --since 1h \
   --follow
 ```
@@ -661,7 +661,7 @@ aws logs tail /aws/codebuild/nasdaq-stock-pipeline-ci-dev \
 
 ```bash
 # View CD deployment logs
-aws logs tail /aws/codebuild/nasdaq-stock-pipeline-cd-dev \
+aws logs tail /aws/codebuild/nasdaq-equity-batch-pipeline-cd-dev \
   --since 1h \
   --follow
 ```
@@ -672,14 +672,14 @@ aws logs tail /aws/codebuild/nasdaq-stock-pipeline-cd-dev \
 # Check CI build status
 aws codebuild batch-get-builds \
   --ids $BUILD_ID \
-  --region ap-southeast-1 \
+  --region us-east-1 \
   --query 'builds[0].[buildStatus,startTime,endTime]' \
   --output table
 
 # List recent builds
 aws codebuild list-builds-for-project \
-  --project-name nasdaq-stock-pipeline-ci-dev \
-  --region ap-southeast-1 \
+  --project-name nasdaq-equity-batch-pipeline-ci-dev \
+  --region us-east-1 \
   --max-items 10
 ```
 
@@ -712,7 +712,7 @@ Navigate to: AWS Console → CloudWatch → Dashboards
 **Solution:**
 ```bash
 # Check build logs
-aws logs tail /aws/codebuild/nasdaq-stock-pipeline-ci-dev --since 1h
+aws logs tail /aws/codebuild/nasdaq-equity-batch-pipeline-ci-dev --since 1h
 
 # Run linting locally
 flake8 lambda/ glue/
@@ -736,16 +736,16 @@ python -m pytest tests/
 **Solution:**
 ```bash
 # Verify artifacts exist
-aws s3 ls s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/lambda/
+aws s3 ls s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/lambda/
 
 # Check Lambda function exists
 aws lambda get-function \
-  --function-name nasdaq-stock-extractor-dev-geekytan \
-  --region ap-southeast-1
+  --function-name nasdaq-equity-batch-pipeline-extractor-dev-username \
+  --region us-east-1
 
 # Verify IAM permissions
 aws codebuild batch-get-projects \
-  --names nasdaq-stock-pipeline-cd-dev \
+  --names nasdaq-equity-batch-pipeline-cd-dev \
   --query 'projects[0].serviceRole'
 ```
 
@@ -764,17 +764,17 @@ aws codebuild batch-get-projects \
 **Solution:**
 ```bash
 # Check if artifacts exist
-aws s3 ls s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/ --recursive
+aws s3 ls s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/ --recursive
 
 # Check CI build completed successfully
 aws codebuild list-builds-for-project \
-  --project-name nasdaq-stock-pipeline-ci-dev \
-  --region ap-southeast-1 \
+  --project-name nasdaq-equity-batch-pipeline-ci-dev \
+  --region us-east-1 \
   --max-items 1
 
 # Manually upload if needed (temporary fix)
 aws s3 cp lambda-function.zip \
-  s3://nasdaq-stock-pipeline-codebuild-artifacts-dev/lambda/
+  s3://nasdaq-equity-batch-pipeline-codebuild-artifacts-dev/lambda/
 ```
 
 ---
@@ -796,15 +796,15 @@ cd terraform/
 terraform show | grep enable_cd_webhook
 
 # Verify CodeBuild project exists
-aws codebuild list-projects --region ap-southeast-1
+aws codebuild list-projects --region us-east-1
 
 # Re-apply Terraform to fix webhook
 terraform apply -auto-approve
 
 # Test webhook manually
 aws codebuild start-build \
-  --project-name nasdaq-stock-pipeline-ci-dev \
-  --region ap-southeast-1
+  --project-name nasdaq-equity-batch-pipeline-ci-dev \
+  --region us-east-1
 ```
 
 ---
@@ -823,7 +823,7 @@ aws codebuild start-build \
 ```bash
 # Check current timeout
 aws codebuild batch-get-projects \
-  --names nasdaq-stock-pipeline-ci-dev \
+  --names nasdaq-equity-batch-pipeline-ci-dev \
   --query 'projects[0].timeoutInMinutes'
 
 # Increase timeout in Terraform (if needed)
@@ -850,12 +850,12 @@ terraform apply
 ```bash
 # Verify EventBridge rule exists
 aws events describe-rule \
-  --name nasdaq-stock-pipeline-daily-trigger-dev \
-  --region ap-southeast-1
+  --name nasdaq-equity-batch-pipeline-daily-trigger-dev \
+  --region us-east-1
 
 # Verify Step Functions exists
 aws stepfunctions list-state-machines \
-  --region ap-southeast-1
+  --region us-east-1
 
 # This is informational only - errors won't block deployment
 # To disable logging, remove from buildspec-cd.yml
@@ -870,8 +870,8 @@ Enable debug mode for more verbose logging:
 ```bash
 # Set debug environment variable
 aws codebuild start-build \
-  --project-name nasdaq-stock-pipeline-cd-dev \
-  --region ap-southeast-1 \
+  --project-name nasdaq-equity-batch-pipeline-cd-dev \
+  --region us-east-1 \
   --environment-variables-override \
     name=DEBUG,value=true,type=PLAINTEXT
 ```
@@ -919,7 +919,7 @@ post_build:
     - echo "Triggering CD deployment..."
     - |
       aws codebuild start-build \
-        --project-name nasdaq-stock-pipeline-cd-${ENVIRONMENT} \
+        --project-name nasdaq-equity-batch-pipeline-cd-${ENVIRONMENT} \
         --region ${AWS_REGION}
 ```
 
@@ -1024,13 +1024,13 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-southeast-1
+          aws-region: us-east-1
       
       - name: Trigger CodeBuild CI
         run: |
           aws codebuild start-build \
-            --project-name nasdaq-stock-pipeline-ci-dev \
-            --region ap-southeast-1
+            --project-name nasdaq-equity-batch-pipeline-ci-dev \
+            --region us-east-1
       
       - name: Wait for CI to complete
         run: |
@@ -1039,8 +1039,8 @@ jobs:
       - name: Trigger CodeBuild CD
         run: |
           aws codebuild start-build \
-            --project-name nasdaq-stock-pipeline-cd-dev \
-            --region ap-southeast-1
+            --project-name nasdaq-equity-batch-pipeline-cd-dev \
+            --region us-east-1
 ```
 
 ---
