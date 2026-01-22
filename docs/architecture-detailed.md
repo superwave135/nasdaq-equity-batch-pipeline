@@ -514,48 +514,48 @@ GROUP BY sector, date
 │  START                                                             │
 │    │                                                               │
 │    ▼                                                               │
-│  ┌──────────────────────────────────────────────┐                 │
-│  │  Extract Stock Data (Lambda)                 │                 │
-│  │  • Invoke Lambda function                    │                 │
-│  │  • Capture data_date in ResultSelector       │                 │
-│  │  • Retry: 2 attempts, exponential backoff    │                 │
-│  └──────────────────────────────────────────────┘                 │
+│  ┌──────────────────────────────────────────────┐                  │
+│  │  Extract Stock Data (Lambda)                 │                  │
+│  │  • Invoke Lambda function                    │                  │
+│  │  • Capture data_date in ResultSelector       │                  │
+│  │  • Retry: 2 attempts, exponential backoff    │                  │
+│  └──────────────────────────────────────────────┘                  │
 │    │                                                               │
-│    ├─ Success → Wait 3s                                           │
-│    └─ Failure → Lambda Extraction Failed (END)                    │
-│    │                                                               │
-│    ▼                                                               │
-│  ┌──────────────────────────────────────────────┐                 │
-│  │  Process Dimensions (Glue Job)               │                 │
-│  │  • Pass data_date as --processing_date       │                 │
-│  │  • Sync execution (wait for completion)      │                 │
-│  │  • Retry: 1 attempt                          │                 │
-│  └──────────────────────────────────────────────┘                 │
-│    │                                                               │
-│    ├─ Success → Wait 3s                                           │
-│    └─ Failure → Glue Dimensions Failed (END)                      │
+│    ├─ Success → Wait 3s                                            │
+│    └─ Failure → Lambda Extraction Failed (END)                     │
 │    │                                                               │
 │    ▼                                                               │
-│  ┌──────────────────────────────────────────────┐                 │
-│  │  Process Fact Table (Glue Job)               │                 │
-│  │  • Pass data_date as --processing_date       │                 │
-│  │  • Sync execution                            │                 │
-│  │  • Retry: 1 attempt                          │                 │
-│  └──────────────────────────────────────────────┘                 │
+│  ┌──────────────────────────────────────────────┐                  │
+│  │  Process Dimensions (Glue Job)               │                  │
+│  │  • Pass data_date as --processing_date       │                  │
+│  │  • Sync execution (wait for completion)      │                  │
+│  │  • Retry: 1 attempt                          │                  │
+│  └──────────────────────────────────────────────┘                  │
 │    │                                                               │
-│    ├─ Success → Wait 3s                                           │
-│    └─ Failure → Glue Fact Table Failed (END)                      │
+│    ├─ Success → Wait 3s                                            │
+│    └─ Failure → Glue Dimensions Failed (END)                       │
 │    │                                                               │
 │    ▼                                                               │
-│  ┌──────────────────────────────────────────────┐                 │
-│  │  Process Aggregations (Glue Job)             │                 │
-│  │  • Pass data_date as --processing_date       │                 │
-│  │  • Sync execution                            │                 │
-│  │  • Retry: 1 attempt                          │                 │
-│  └──────────────────────────────────────────────┘                 │
+│  ┌──────────────────────────────────────────────┐                  │
+│  │  Process Fact Table (Glue Job)               │                  │
+│  │  • Pass data_date as --processing_date       │                  │
+│  │  • Sync execution                            │                  │
+│  │  • Retry: 1 attempt                          │                  │
+│  └──────────────────────────────────────────────┘                  │
 │    │                                                               │
-│    ├─ Success → Pipeline Succeeded (END) ✅                       │
-│    └─ Failure → Glue Aggregations Failed (END)                    │
+│    ├─ Success → Wait 3s                                            │
+│    └─ Failure → Glue Fact Table Failed (END)                       │
+│    │                                                               │
+│    ▼                                                               │
+│  ┌──────────────────────────────────────────────┐                  │
+│  │  Process Aggregations (Glue Job)             │                  │
+│  │  • Pass data_date as --processing_date       │                  │
+│  │  • Sync execution                            │                  │
+│  │  • Retry: 1 attempt                          │                  │
+│  └──────────────────────────────────────────────┘                  │
+│    │                                                               │
+│    ├─ Success → Pipeline Succeeded (END) ✅                        │
+│    └─ Failure → Glue Aggregations Failed (END)                     │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
@@ -1693,6 +1693,6 @@ terraform destroy -var-file="environments/dev.tfvars"
 
 ---
 
-**Last Updated**: January 21, 2026  
+**Last Updated**: January 22, 2026  
 **Architecture Version**: 1.0  
-**Maintained By**: Data Engineering Team
+**Maintained By**: GeekyTan
