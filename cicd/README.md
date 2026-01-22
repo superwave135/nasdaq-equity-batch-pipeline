@@ -55,15 +55,15 @@ This CI/CD pipeline automates the build, test, and deployment process for the NA
                             │ manages
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                 ORCHESTRATION LAYER                          │
-│                                                              │
-│  ┌──────────────┐              ┌─────────────────┐         │
-│  │ EventBridge  │──triggers──→ │ Step Functions  │         │
-│  │ (Schedule)   │              │ (Orchestrator)  │         │
-│  └──────────────┘              └─────────────────┘         │
-│                                        │                     │
-│                                        │ coordinates         │
-│                                        ↓                     │
+│                 ORCHESTRATION LAYER                         │
+│                                                             │
+│  ┌──────────────┐              ┌─────────────────┐          │
+│  │ EventBridge  │──triggers──→ │ Step Functions  │          │
+│  │ (Schedule)   │              │ (Orchestrator)  │          │
+│  └──────────────┘              └─────────────────┘          │
+│                                        │                    │
+│                                        │ coordinates        │
+│                                        ↓                    │
 │                          ┌──────────────────────┐           │
 │                          │  Lambda + Glue Jobs  │           │
 │                          └──────────────────────┘           │
@@ -72,22 +72,22 @@ This CI/CD pipeline automates the build, test, and deployment process for the NA
                             │ deploys code
                             │
 ┌─────────────────────────────────────────────────────────────┐
-│                     CI/CD LAYER                              │
-│                                                              │
-│  ┌─────────────────┐           ┌─────────────────┐         │
-│  │   CI PROJECT    │           │   CD PROJECT    │         │
-│  │                 │           │                 │         │
-│  │ • Build code    │           │ • Deploy Lambda │         │
-│  │ • Run tests     │───S3─────→│ • Deploy Glue   │         │
-│  │ • Package       │ artifacts │ • Log orch      │         │
-│  └─────────────────┘           └─────────────────┘         │
+│                     CI/CD LAYER                             │
+│                                                             │
+│  ┌─────────────────┐           ┌─────────────────┐          │
+│  │   CI PROJECT    │           │   CD PROJECT    │          │
+│  │                 │           │                 │          │
+│  │ • Build code    │           │ • Deploy Lambda │          │
+│  │ • Run tests     │───S3─────→│ • Deploy Glue   │          │
+│  │ • Package       │ artifacts │ • Log orch      │          │
+│  └─────────────────┘           └─────────────────┘          │
 │         ↑                              │                    │
 └─────────┼──────────────────────────────┼────────────────────┘
           │                              │
           │                              │
 ┌─────────┼──────────────────────────────┼────────────────────┐
 │         │      SOURCE CONTROL          │                    │
-│  ┌──────┴──────────────────────────────┴──────┐           │
+│  ┌──────┴──────────────────────────────┴────────┐           │
 │  │          GitHub Repository                   │           │
 │  │  (nasdaq-equity-batch-pipeline)              │           │
 │  └──────────────────────────────────────────────┘           │
