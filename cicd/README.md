@@ -1164,8 +1164,6 @@ This CI/CD pipeline is part of the NASDAQ Stock Data Pipeline project.
 ## 📞 Contact
 
 - **Project Owner:** geekytan
-- **DevOps Team:** [Contact Info]
-- **GitHub:** [Repository URL]
 
 ---
 
