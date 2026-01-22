@@ -24,7 +24,7 @@
 ┌──────────────────────────────────────────────────────────────────────┐
 │                    DATA TRANSFORMATION PIPELINE                      │
 │                                                                      │
-│  Raw API Data → Staging → Dimensions → Facts → Aggregations         │
+│  Raw API Data → Staging → Dimensions → Facts → Aggregations          │
 └──────────────────────────────────────────────────────────────────────┘
 
 Stage 1: EXTRACTION (Lambda)
